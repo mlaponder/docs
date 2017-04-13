@@ -69,3 +69,8 @@ It is also possible to force the client to use a specific profile by adding a `p
 https://myapp.mendixcloud.com/index.html?profile=Responsive
 
 ```
+
+## 4 Converting to Mendix 7.2 and higher
+When converting from an older version to Mendix 7.2 or higher your profiles are converted to the updated profiles. Profiles which are disabled and not referenced in the project will be deleted.
+When a disabled profile could not be deleted because it is referenced somewhere in the project the profile will be kept. This might lead to consistency errors because consistency was not checked
+on disabled profiles, but is checked for all profiles now.
