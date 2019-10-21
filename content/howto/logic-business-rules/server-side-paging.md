@@ -116,6 +116,42 @@ In the previous section you added the **Paging** input parameter to your microfl
 
 Deploy your app and navigate to the page where you added your data grid. You can now use your newly added server-side paging by using the paging bar buttons above the data grid. 
 
+### 5.1 Handling the end of the Data Set
+
+The paging bar will increase the page number each time you click the next page button. But of course you don't want that to happen when you reached the
+end of the dataset. Most of the REST services nowadays give you the information if the end of the dataset has been reached. In Mendix 8.4 we introduced an
+additional boolean attribute on the **Paging** object called **hasMoreData**. If this is set to **false** the next-page button will not move you forward to
+the next page.
+
+The example REST service we are using is returning this information in a HTTP header with the key **Link**, if there is a next page it will contain the
+string **next** in its value. So we can use this value to set the **hasMoreData** attribute:
+
+1. Open the the **CallREST** microflow.
+2. From the **Toolbox** drag the **Retrieve** activity onto the microflow after the REST call activity and double-click it.
+3. Click **Select...** to open the select association dialog.
+4. Select *lastestHttpHeader/HttpHeaders* in the dialog and press **OK**. This will give us all the HTTP headers the REST service call returned:
+{{% image_container width="500" %}}![select HTTP header](attachments/server-side-paging/select-http-headers.png){{% /image_container %}}
+5. Click **OK** to accept the changes to the **Retrieve** activity.
+6. Now we need to find the 'Link' HTTP header in this list. From the **Toolbox** drag the **List operation** activity after the operation we added in the previous step and double-click it.
+7. Change **Operation** to 'Find', **List** to 'HttpHeaderList' and **Member** to 'Key'.
+8. Click **Edit** on the **Equals** field and set the value to 'Link' and press **OK** to accept this change:
+{{% image_container width="500" %}}![equals expression](attachments/server-side-paging/equals-expression.png){{% /image_container %}}
+9. Change **Object name** to 'HttpLinkHeader'.
+10. Press **OK** to accept the changes to the list operation activity:
+{{% image_container width="500" %}}![link operation](attachments/server-side-paging/link-operation.png){{% /image_container %}}
+11. Now we can use the output of the previous set to set the **hasMoreData** attribute in the **Paging** object. From the **Toolbox** drag the **Change object** activity onto the microflow after the list operation activity and double-click it.
+12. Set the **Paging** object as Inout object.
+13. Click the **New** button the toolbar in this dialog the set the value of a member of the paging entity
+14. In the 'Edit change item' dialog set the member to **HasMoreData**
+15. Set the value in this dialog to 'contains($LinkHttpHeader/Value, 'next')' and press **OK** to accept the changes:
+{{% image_container width="500" %}}![set hasMoreData](attachments/server-side-paging/set-has-more-data.png){{% /image_container %}}
+
+The resulting microflow will look like this:
+{{% image_container width="500" %}}![mf hasMoreData](attachments/server-side-paging/mf-has-more-data.png){{% /image_container %}}
+
+Deploy your app and navigate to the page where you added your data grid. The next-page button will move you forward to the next page as
+before, but when you reached the end of the data-set you will stay on the last page.
+
 ## 6 Adding Server-Side Sorting Support to the Microflow Data Source
 
 Now you have service-side paging for your data grid. Next, add server-side sorting to it.
